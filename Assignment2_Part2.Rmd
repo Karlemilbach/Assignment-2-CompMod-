@@ -15,6 +15,116 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Last year you assessed the teachers (darned time runs quick!). Now you want to re-test them and assess whether your models are producing reliable predictions. In Methods 3 we learned how to do machine-learning style assessment of predictions (e.g. rmse on testing datasets). Bayesian stats makes things a bit more complicated. So we'll try out how that works. N.B. You can choose which prior to use for the analysis of last year's data.
 
+```{r}
+library(rethinking)
+
+
+plotPosterior <- function(dens = 20, prior = rep(1, dens), num.obs = 5, size = 5, title = "Posterior&Prior") {
+  p_grid <- seq(from = 0, to = 1, length.out = dens)
+  prior <- prior
+# compute likelihood at each value in grid
+  likelihood <- dbinom(num.obs, size = size, prob = p_grid)
+# compute posterior
+  unstandardized.posterior <- likelihood*prior
+# standardize the posterior (so it sums to 1)
+  posterior <- unstandardized.posterior / sum(unstandardized.posterior)
+#data frame
+  Data=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood_Riccardo)
+#plot the estimated knowledge
+  normal_R <- ggplot(Data,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red') + labs(title = title)
+normal_R
+  return(normal_R)
+}
+
+
+
+
+# Riccardo
+dens = 50
+p_grid <- seq(from = 0, to = 1, length.out = dens)
+prior <- dnorm(p_grid, 0.8, 0.2) # non-uniform
+# compute likelihood at each value in grid
+likelihood_Riccardo <- dbinom(3, size = 6, prob = p_grid)
+# compute posterior
+unstandardized.posterior <- likelihood_Riccardo*prior
+# standardize the posterior (so it sums to 1)
+posterior <- unstandardized.posterior / sum(unstandardized.posterior)
+#data frame
+Data=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood_Riccardo)
+#plot the estimated knowledge
+normal_R <- ggplot(Data,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red') + labs(x = "mean=0.8, sd=0.2",title = "Riccardo")
+normal_R
+
+plotPosterior(dens = 50, prior = posterior, num.obs = 9, size = 10)
+
+
+
+
+# Kristian
+dens = 50
+p_grid <- seq(from = 0, to = 1, length.out = dens )
+prior <- dnorm(p_grid, 0.8, 0.2) # non-uniform
+# compute likelihood at each value in grid
+likelihood_Kristian <- dbinom(2, size = 2, prob = p_grid)
+# compute posterior
+unstandardized.posterior <- likelihood_Kristian*prior
+# standardize the posterior (so it sums to 1)
+posterior <- unstandardized.posterior / sum(unstandardized.posterior)
+#data frame
+Data=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood_Kristian)
+#plot the estimated knowledge
+normal_K <- ggplot(Data,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red') + labs(x = "mean=0.8, sd=0.2",title = "Kristian")
+
+
+plotPosterior(dens = 50, prior = posterior, num.obs = 8, size = 12)
+
+
+
+
+# Josh
+dens = 50
+p_grid <- seq(from = 0, to = 1, length.out = dens )
+prior <- dnorm(p_grid, 0.8, 0.2) # non-uniform
+# compute likelihood at each value in grid
+likelihood_Josh <- dbinom(160, size = 198, prob = p_grid)
+# compute posterior
+unstandardized.posterior <- likelihood_Josh*prior
+# standardize the posterior (so it sums to 1)
+posterior <- unstandardized.posterior / sum(unstandardized.posterior)
+#data frame
+Data=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood_Josh)
+#plot the estimated knowledge
+normal_J <- ggplot(Data,aes(grid,posterior))+ geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red') + labs(x = "mean=0.8, sd=0.2",title = "Josh")
+
+
+plotPosterior(dens = 50, prior = posterior, num.obs = 148, size = 172)
+
+
+
+
+# Mikkel
+dens = 50
+p_grid <- seq(from = 0, to = 1, length.out = dens )
+prior <- dnorm(p_grid, 0.8, 0.2) # non-uniform
+# compute likelihood at each value in grid
+likelihood_Mikkel <- dbinom(66, size = 132, prob = p_grid)
+# compute posterior
+unstandardized.posterior <- likelihood_Mikkel*prior
+# standardize the posterior (so it sums to 1)
+posterior <- unstandardized.posterior / sum(unstandardized.posterior)
+#data frame
+Data=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood_Mikkel)
+#plot the estimated knowledge
+normal_M <- ggplot(Data,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red') + labs(x = "mean=0.8, sd=0.2",title = "Mikkel")
+
+
+plotPosterior(dens = 50, prior = posterior, num.obs = 34, size = 65)
+
+
+
+```
+
+
 Questions to be answered (but see guidance below):
 1- Write a paragraph discussing how assessment of prediction performance is different in Bayesian vs. frequentist models
 2- Provide at least one plot and one written line discussing prediction errors for each of the teachers.
@@ -37,6 +147,115 @@ Guidance Tips
 2. Last year's results are this year's expectations.
 3. Are the parameter estimates changing? (way 1)
 4. How does the new data look in last year's predictive posterior? (way 2)
+
+```{r}
+
+library(rethinking)
+
+# in progress
+plotPP <- function(old.data=NULL, dens = 20, sample.size = 1e4, replace = T, pred.size = 1e4, num.obs = 10, title = "predictive posterior"){
+  p_grid <- seq(from = 0, to = 1, length.out = dens)
+  
+  if(replace == T) {
+  samples <- sample(p_grid, prob = old.data, size = sample.size, replace = T)
+  }
+  
+  else {
+  samples_ <- sample(p_grid, prob = posterior, size = sample.size)
+  }
+  
+
+posterior_pred <- rbinom(pred.size, size = 10, prob = samples)
+return(simplehist(posterior_pred, main = title))
+} 
+
+
+# Riccardo
+dens = 50
+p_grid <- seq(from = 0, to = 1, length.out = dens)
+prior <- dnorm(p_grid, 0.8, 0.2) # non-uniform
+# compute likelihood at each value in grid
+likelihood_Riccardo <- dbinom(3, size = 6, prob = p_grid)
+# compute posterior
+unstandardized.posterior <- likelihood_Riccardo*prior
+# standardize the posterior (so it sums to 1)
+posterior <- unstandardized.posterior / sum(unstandardized.posterior)
+#data frame
+Data=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood_Riccardo)
+#plot the estimated knowledge
+normal_R <- ggplot(Data,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red') + labs(x = "mean=0.8, sd=0.2",title = "Riccardo")
+normal_R
+
+
+plotPP(old.data = posterior, dens = 50, num.obs = 10, title = "Riccardo")
+
+
+# Kristian
+dens = 50
+p_grid <- seq(from = 0, to = 1, length.out = dens )
+prior <- dnorm(p_grid, 0.8, 0.2) # non-uniform
+# compute likelihood at each value in grid
+likelihood_Kristian <- dbinom(2, size = 2, prob = p_grid)
+# compute posterior
+unstandardized.posterior <- likelihood_Kristian*prior
+# standardize the posterior (so it sums to 1)
+posterior <- unstandardized.posterior / sum(unstandardized.posterior)
+#data frame
+Data=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood_Kristian)
+#plot the estimated knowledge
+normal_K <- ggplot(Data,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red') + labs(x = "mean=0.8, sd=0.2",title = "Kristian")
+
+
+plotPP(old.data = posterior, dens = 50, num.obs = 12, title = "Kristian")
+
+
+
+
+# Josh
+dens = 50
+p_grid <- seq(from = 0, to = 1, length.out = dens )
+prior <- dnorm(p_grid, 0.8, 0.2) # non-uniform
+# compute likelihood at each value in grid
+likelihood_Josh <- dbinom(160, size = 198, prob = p_grid)
+# compute posterior
+unstandardized.posterior <- likelihood_Josh*prior
+# standardize the posterior (so it sums to 1)
+posterior <- unstandardized.posterior / sum(unstandardized.posterior)
+#data frame
+Data=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood_Josh)
+#plot the estimated knowledge
+normal_J <- ggplot(Data,aes(grid,posterior))+ geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red') + labs(x = "mean=0.8, sd=0.2",title = "Josh")
+
+
+plotPP(old.data = posterior, dens = 50, num.obs = 172, title = "Josh")
+
+
+
+
+# Mikkel
+dens = 50
+p_grid <- seq(from = 0, to = 1, length.out = dens )
+prior <- dnorm(p_grid, 0.8, 0.2) # non-uniform
+# compute likelihood at each value in grid
+likelihood_Mikkel <- dbinom(66, size = 132, prob = p_grid)
+# compute posterior
+unstandardized.posterior <- likelihood_Mikkel*prior
+# standardize the posterior (so it sums to 1)
+posterior <- unstandardized.posterior / sum(unstandardized.posterior)
+#data frame
+Data=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood_Mikkel)
+#plot the estimated knowledge
+normal_M <- ggplot(Data,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red') + labs(x = "mean=0.8, sd=0.2",title = "Mikkel")
+
+
+plotPP(old.data = posterior, dens = 50, num.obs = 65, title = "Mikkel")
+
+
+
+```
+
+
+
 
 
 ### Depending on time: Questions from the handbook
