@@ -226,10 +226,6 @@ Data=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihoo
 normal_R <- ggplot(Data,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red') + labs(x = "mean=0.8, sd=0.2",title = "Riccardo")
 
 
-# better than chance?
-sum(posterior[p_grid > 0.5])
-
-
 
 # Kristian
 dens = 1000
